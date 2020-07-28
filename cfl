@@ -1,0 +1,42 @@
+## Enable cpu freq limit when it is needed
+setprop cpufreq.limit.status 1
+if [ $(getprop cpufreq.limit.freqv) = "" ] ; then
+ chain=$(getprop cpufreq.limit.freqv.default)
+else
+ chain=$(getprop cpufreq.limit.freqv)
+fi
+nochain=-1
+if [ $(getprop cpufreq.limit.dtempa) = "" ] ; then
+ determined_avg=$(getprop cpufreq.limit.dtempa.default)
+else
+determined_avg=$(getprop cpufreq.limit.dtempa)
+fi
+thermal_dir="/sys/devices/virtual/thermal/thermal_zone11/temp"
+freq_limit_dir="/sys/power/cpufreq_max_limit"
+while true 
+ do
+  if [ $(getprop cpufreq.limit.status) -eq 1 ] ; then
+   for i in 1 2 3 4 5
+    do
+      temp[i]=$(cat $thermal_dir)
+      sleep 1
+   done
+   total=0
+   for i in 1 2 3 4 5
+    do
+      total=$(( total + temp[i] ))
+   done
+   avg=$(( total / 5 ))
+   if [ $avg -ge $determined_avg ] ; then
+     chmod 755 $freq_limit_dir
+     echo $chain > $freq_limit_dir
+     sleep 10
+    else
+     chmod 755 $freq_limit_dir
+     echo $nochain > $freq_limit_dir
+     sleep 10
+   fi
+   else
+    sleep 10
+  fi
+done
