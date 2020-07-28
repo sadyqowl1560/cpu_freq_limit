@@ -1,0 +1,7 @@
+sfile="/data/cfl_config.txt"
+tempp="cpufreq.limit.dtempa"
+freqp="cpufreq.limit.freqv"
+tempv=$(cat $sfile |grep "cpufreq.limit.dtempa" |grep -o [0-9][0-9])
+setprop $tempp $tempv
+freqv=$(cat $sfile |grep "cpufreq.limit.freqv" |grep -o [0-9][0-9][0-9][0-9][0-9][0-9][0-9])
+setprop $freqp $freqv
